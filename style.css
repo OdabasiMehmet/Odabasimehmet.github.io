@@ -201,9 +201,6 @@ header nav {
   top: 5rem;
 }
 
-#cert1:hover {
-}
-
 .othercert {
   width: 100%;
   display: grid;
@@ -230,6 +227,39 @@ header nav {
 }
 
 /*? Articles CSS */
+.articlebody{
+  display: grid;
+  place-items: center;
+  width: 100%;
+  background: black;
+  
+}
+  .articlediv{
+    margin-top: calc(8.7rem + 7.5vh) ;
+    width: 90%;
+    background-color: rgba(84, 108, 132, 0.296);
+    display: grid;
+    justify-content: center;
+    border-radius: 35px;
+    text-align: center;
+    font-size: 3.5rem;
+    font-weight: bold;
+    color: #ffffffb5;
+    padding-top: 2.5rem; 
+  }
+  .articlediv div:nth-child(2){
+    padding: 3.5rem 0% 5rem;
+    display: grid;
+    flex-flow: column wrap;
+    align-items: center;
+
+    width: 100%;
+  }
+  .articlediv div:nth-child(2) a{}
+  .articlediv a{
+    display: inline-block;
+    
+  }
 /*? Footer CSS */
 footer {
   background-color: #001a30;
