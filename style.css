@@ -173,7 +173,7 @@ header nav {
 .maincert {
   width: 90%;
   display: grid;
-  margin-top: 5rem;
+  margin-top: 2.5rem;
   justify-content: center;
   padding-top: 2.5rem;
 }
@@ -205,7 +205,7 @@ header nav {
   width: 100%;
   display: grid;
   justify-items: center;
-  margin-top: 0rem;
+  margin-top: -2rem;
   padding-top: 2.5rem;
 }
 
@@ -215,7 +215,7 @@ header nav {
   flex-flow: row wrap;
   justify-content: space-evenly;
   gap: 55px;
-  padding: 12.5rem 0% 5rem;
+  padding: 9.5rem 0% 5rem;
   background-color: rgba(84, 108, 132, 0.296);
   border-radius: 35px;
   margin-bottom: 3rem;
@@ -227,39 +227,44 @@ header nav {
 }
 
 /*? Articles CSS */
-.articlebody{
+.articlebody {
   display: grid;
   place-items: center;
   width: 100%;
   background: black;
-  
 }
-  .articlediv{
-    margin-top: calc(8.7rem + 7.5vh) ;
-    width: 90%;
-    background-color: rgba(84, 108, 132, 0.296);
-    display: grid;
-    justify-content: center;
-    border-radius: 35px;
-    text-align: center;
-    font-size: 3.5rem;
-    font-weight: bold;
-    color: #ffffffb5;
-    padding-top: 2.5rem; 
-  }
-  .articlediv div:nth-child(2){
-    padding: 3.5rem 0% 5rem;
-    display: grid;
-    flex-flow: column wrap;
-    align-items: center;
+.articlediv {
+  margin-top: calc(4rem + 7.5vh);
+  width: 90%;
+  background-color: rgba(84, 108, 132, 0.296);
+  display: grid;
+  justify-content: center;
+  border-radius: 35px;
+  text-align: center;
+  font-size: 3.5rem;
+  font-weight: bold;
+  color: #ffffffb5;
+  padding-top: 2.5rem;
+  margin-bottom: 3rem;
+}
+.articlediv div:nth-child(2) {
+  padding: 3.5rem 0% 5rem;
+  display: grid;
+  flex-flow: column wrap;
+  align-items: center;
+  width: 100%;
+  gap: 17.5px;
+}
 
-    width: 100%;
-  }
-  .articlediv div:nth-child(2) a{}
-  .articlediv a{
-    display: inline-block;
-    
-  }
+.articlediv div:nth-child(3) a img {
+  border: 3px solid red;
+}
+
+.med_links img {
+  height: 200px;
+  width: 750px;
+}
+
 /*? Footer CSS */
 footer {
   background-color: #001a30;
@@ -275,4 +280,32 @@ footer {
 }
 footer nav {
   position: absolute;
+}
+
+.socials {
+  padding-left: 10rem;
+}
+header .socials a {
+  color: #ffffff;
+  padding-right: 0.3rem;
+  font-size: 2rem;
+}
+
+header .socials a:hover {
+  color: rgb(3, 144, 226);
+  font-size: 2.4rem;
+}
+
+.homesocials {
+  padding-left: 1rem;
+}
+header .homesocials a {
+  color: #ffffff;
+  padding-right: 0.3rem;
+  font-size: 2rem;
+}
+
+header .homesocials a:hover {
+  color: rgb(3, 144, 226);
+  font-size: 2.4rem;
 }
