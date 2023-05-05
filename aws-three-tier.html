@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Certifications</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="shortcut icon" href="images/fav-lotus.png" type="image/x-icon" />
+    <script
+      src="https://kit.fontawesome.com/12dbc08a40.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body id="certbody">
+    <header class="otherheader">
+      <h1><span id="title">Mehmet</span> <span id="title2">Odabasi</span></h1>
+      <nav class="socials">
+        <a href="https://www.linkedin.com/in/mehmet-odabasi/" target="_blank"
+          ><i class="fa-brands fa-linkedin"></i
+        ></a>
+        <a href="https://twitter.com/mehmetodabashi" target="_blank"
+          ><i class="fa-brands fa-twitter"></i
+        ></a>
+        <a href="https://medium.com/@mehmetodabashi" target="_blank"
+          ><i class="fa-brands fa-medium"></i
+        ></a>
+        <a href="https://github.com/OdabasiMehmet" target="_blank"
+          ><i class="fa-brands fa-github"></i
+        ></a>
+      </nav>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="articles.html">Articles</a>
+        <a href="certifications.html" style="color: #09c7e9">Certifications</a>
+        <a href="portfolio.html">Portfolio</a>
+      </nav>
+    </header>
+      <div class="showWhite"> 
+        
+        <h2 style="text-align: center;">AWS 3 Tier Blogging Application</h2>
+        <br>
+        
+        
+        
+        <p>A 3-tier architecture is a common way to design web applications, which separates the different components of the application into three layers: presentation, application logic, and data storage. In a typical 3-tier architecture, the presentation layer is responsible for rendering the user interface, the application logic layer processes requests and implements business logic, and the data storage layer manages the application's persistent data.</p>
+        
+        <br>
+        
+        <p>I recently completed a blogging project. The architecture of the project consists of the presentation tier (S3 and CloudFront), application logic tier (EC2 instances), and data storage tier (MySQL RDS, DynamoDB, and S3). These components are distributed across the public and private subnets within a dedicated VPC, and are designed to be scalable, highly available, and secure.</p>
+        
+        <br>
+        
+        <p>Here is the diagram of the architecture.</p>
+        
+        <br>
+        
+        
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/blog.png?w=801" alt="" class="wp-image-1885"/></figure>
+        
+        
+        <br>
+        <br>
+        <h3 >The architecture</h4>
+        
+        <br>
+        
+        <p>* First of all, the main objective of the project is to deploy a blogging application, where people can visit, register, and create posts with images. I was provided with the necessary source code of the blogging app and my job was to implement a three-tier architecture to deploy the application.</p>
+        
+        <br>        
+        <p>* The whole architecture is built within a dedicated VPC. In terms of Availability Zones, two of them are utilized with each having both a private and a public subnet.</p>
+        <br>        
+        
+        <p>* EC2 instances which will host the blogging application and the MySQL database which will hold the data are placed within private subnets. So, they will not have Internet access directly and will be secure in their locations. </p>
+                <br>
+                
+        <p>* A NAT instance is placed within the public subnets to help the EC2 instances hosting the blogging application to communicate with the internet, while still remaining isolated from the public internet</p>
+        <br>       
+        
+        <p>* An autoscaling group is used for scalability and an application load balancer is used for high availability.</p>
+        <br>      
+        
+        <p>* S3 Buckets are used for storing the blog images and also for creating a static website in terms of failover. Route53 is used to create a hosted zone for the blogging application and uses CloudFront deployment as record value which actually uses the application load balancer as origin.</p>
+        <br>       
+        
+        <p>* A lambda function is used to trigger any create and delete actions in terms of blog images and a list of those images will be stored in a DynamoDB table.</p>
+        
+        <br>        
+        
+        <h2 style="text-align: center;">Project Steps</h3>
+        
+        <br>  
+        <h4 class="wp-block-heading">Step 1 Creating VPC</h4>
+        
+        <br>  
+        
+        <p>We will start with creating a dedicated VPC.</p>
+        
+        <br>  
+        
+        <p>1.  Open AWS Management Console and enter VPC in the search bar. Then click on VPC to navigate to the VPC Dashboard. </p>
+        <br>  
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/vpc-service.jpg?w=1024" alt="" class="wp-image-1888"/></figure>
+        
+        
+        <br>  
+        <p>2. Click on "Create VPC". </p>
+        
+        
+        
+        <p>3. Choose VPC only option and provide a name "Blog-VPC". Then enter CIDR Block as "10.10.0.0/16" and choose default for tenancy. Tag is optional and hit on Create VPC.</p>
+        <br>  
+        
+        
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/vpc.jpg?w=649" alt="" class="wp-image-1890"/></figure>
+        
+        <figure class="wp-block-image aligncenter size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-13.png?w=377" alt="" class="wp-image-1892"/></figure>
+     
+        <br>  
+        
+        <p>4. In the VPC dashboard, select Blog-VPC, Click Actions, choose Edit VPC settings and enable DNS hostnames</p>
+        
+        <br>  
+        
+       
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/vpc2.png?w=716" alt="" class="wp-image-1894"/></figure>
+        <br>  
+        <h4 class="wp-block-heading">Step 2 Creating Subnets</h4>
+        <br>  
+               
+        <p>We will create subnets for the VPC.</p>
+        <br>  
+        
+        
+        <p>1. While still on VPC service, click on subnets on the left pane. </p>
+        
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-14.png?w=199" alt="" class="wp-image-1897"/></figure>
+        
+        <br>  
+        
+        <p>2. Click create subnet and then create 4 subnets with the following features (Once you enter info for one subnet, click on Add new subnet to open additional fields to enter new subnet information):</p>
+        <br>  
+        
+        
+        <ul>
+        <li>Name: Blog-public-subnet-1A VPC: Blog-VPC AZ: us-east-1a CIDR: 10.10.10.0/24</li>
+                
+        <li>Name: Blog-private-subnet-1A VPC: Blog-VPC AZ: us-east-1a CIDR: 10.10.11.0/24</li>
+       
+        <li>Name: Blog-public-subnet-1B VPC: Blog-VPC AZ: us-east-1b CIDR: 10.10.20.0/24</li>
+        
+        <li>Name: Blog-public-subnet-1B VPC: Blog-VPC AZ: us-east-1b CIDR: 10.10.21.0/24</li>
+        </ul>
+        <br>
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-16.png?w=651" alt="" class="wp-image-1904"/></figure>
+        
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-18.png?w=847" alt="" class="wp-image-1909"/></figure>
+        <br>
+        <p>3. One by one, select public subnets. When selected, click on Actions, then Edit Subnet.  Under "auto-assign IP settings" check "Enable auto-assign public IPv4 address".</p>
+        
+        
+        <!-- wp:image {"id":1911,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-19.png?w=703" alt="" class="wp-image-1911"/></figure>
+        <br>
+        <h4 class="wp-block-heading">Step 3 Creating Internet Gateway</h4>
+        <br>
+        
+        <p>We will create an Internet gateway to establish communication between instances in our VPC and the Internet.</p>
+        <br>
+        <p>1. While still on VPC service, click on Internet Gateway on the left pane and then click on Create Internet Gateway.</p>
+        
+        <p>2. Enter Blog-IGW for the name and hit on Create Internet Gateway.</p>
+        <br>
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-20.png?w=737" alt="" class="wp-image-1913"/></figure>
+        <br>        
+        
+        <p>3. You will see a green banner indicating the creation of the Internet Gateway. Click on "Attach to a VPC" on that banner.</p>
+        <br>
+        
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-21.png?w=1024" alt="" class="wp-image-1946"/></figure>
+        <br>
+        
+        <p>Note: If for some reason you are not able to see the banner or you closed it by mistake, then select Internet gateways on the left pane, choose the newly created internet gateway, click on Actions and choose Attach to VPC option.</p>
+        <br>
+                
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-22.png?w=1024" alt="" class="wp-image-1948"/></figure>
+                
+        <br>
+        <p>4. Choose your VPC from the Available VPCs and click on Attach internet gateway.</p>
+        
+        <br>
+        <!-- wp:image {"id":1949,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-23.png?w=726" alt="" class="wp-image-1949"/></figure>
+        
+        
+        <br>
+        <h4 class="wp-block-heading">Step 4 Creating Route Tables</h4>
+        <br>
+                       
+        <p>Route tables control the traffic flow between subnets within the VPC and to and from the internet. A route table contains a set of rules, or routes, that specify how traffic should be directed from one subnet to another, or to an external destination. Therefore, we need to create route tables for the newly created Internet gateway.</p>
+        <br>       
+        
+        <p>1. Select Route Tables from the left pane.</p>
+        
+        <p>2. You will see two route tables (unless you had created more before). The default route table is attached to the default internet gateway. We will not touch it. What we will do is to manage the other one.</p>
+        <br>
+        
+        <!-- wp:image {"align":"wide","id":1952,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/vpc11.png?w=1024" alt="" class="wp-image-1952"/></figure>
+        
+        <br>
+        
+        <p>3. Check the line that belongs to Blog-VPC, click on the edit name icon and add "Blog-public-RT" and click on save. When we created the internet gateway, it created a public route table automatically. We just renamed it to keep track of our resources. </p>
+        
+        <br>
+        
+        <p>4. By default, Blog-public-RT only has local network enabled. We will modify it to have internet connectivity. Therefore, click on Blog-public-RT and when it opens, click on Edit routes on the right.</p>
+        
+        <br>
+        
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-25.png?w=1024" alt="" class="wp-image-1956"/></figure>
+        
+        <br>
+        
+        <p>5. Click on Add route and enter 0.0.0.0/0 for Destination. Then choose Internet Gateway from the Target dropdown list. You will be presented with the newly created internet gateway, select it and click on save changes.</p>
+        
+        
+        
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-26.png?w=1024" alt="" class="wp-image-1958"/></figure>
+        <br>
+        
+        
+        <p>6. Go back to Route tables menu from the left pane and click on Create Route Table on the right. Then enter Blog-private-RT as name, choose Blog-VPC from the VPC list and click on Create route table to create the private route table.</p>
+        <br>
+        
+        
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-24.png?w=736" alt="" class="wp-image-1954"/></figure>
+        
+        <br>
+        
+        <p>7. Now we have two route tables (public and private) but we have to associate them with the subnets we created earlier. First, select the Blog-public-RT by clicking on it and then select Subnet associations tab.</p>
+        <br>
+        
+        
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-27.png?w=1024" alt="" class="wp-image-1960"/></figure>
+        <br>
+        
+        
+        <p>Check the public subnets from the list and click on Save associations.</p>
+        <br>
+        
+        
+        <p>8. Go back to Route tables and select Blog-private-RT. Then choose Subnet associations tab. Finally, check the private subnets from the list and click on Save associations.</p>
+        <br>
+        
+        <!-- wp:image {"align":"wide","id":1962,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-28.png?w=1024" alt="" class="wp-image-1962"/></figure>
+        
+        <br>
+        <!-- wp:heading {"level":4} -->
+        <h4 class="wp-block-heading">Step 5 Creating Endpoint</h4>
+        
+        <br>
+        
+        <p>Endpoints are used to provide secure and private access to AWS services from within a VPC without going over the public internet. We will utilize them for connecting S3 and SDynamoDB. </p>
+        
+        <br>
+        
+        <p>1.Select Endpoints from the left pane and then click on Create endpoint on the right.</p>
+        
+        <p>2. Enter Blog-endpoint for name and choose AWS services for service category.</p>
+       
+        <p>3. In the services list, write s3 in the filter field and choose Service Name: com.amazonaws.us-east-1.s3 from the list. You will be presented three options. Choose Gateway option.</p>
+       
+        <p>4. Choose Blog-VPC from VPC list and select the Blog-Private-RT from route tables. Keep the Full Access as Policy and click on Create endpoint.</p>
+        <br>
+        
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-29.png?w=644" alt="" class="wp-image-1966"/></figure>
+        
+        <br>
+       
+        <h4 class="wp-block-heading">Step 6 Creating Security Groups</h4>
+        <br>
+        
+        <p>We will create security groups to control the inbound and outbound traffic to our resources, such as EC2 instances, RDS instances, and load balancers.</p>
+        <br>
+        
+        
+        <p>1. Select Security Groups from the left pane.</p>
+        
+        <p>2. Click on Create Security Group</p>
+        
+        
+        <p>3. Enter Blog_ALB_Sec_Group for name and enter description (optional).Choose Blog-VPC from VPC list. We will not modify outbound connections and keep defaults for them. But for inbound connections click on Add rule and choose HTTP from the Type dropdown menu. Then choose IPv4 anywhere from the Source list and click on Add rule again.</p>
+        
+        <p>4. Choose HTTPS from the Type dropdown menu and then choose IPv4 anywhere from the Source list and click on Create security group on bottom left.</p>
+        <br>
+        
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-30.png?w=1024" alt="" class="wp-image-1969"/></figure>
+        
+        <br>
+        
+        <p>5. Go back to Security Groups dashboard and click on Create Security Groups again.</p>
+        
+        
+        
+        <p>6. Enter Blog_NAT_Sec_Group for name and enter description (optional). Choose Blog-VPC from VPC list. We will not modify outbound connections and keep defaults for them. But for inbound connections click on Add rule and add HTTP, HTTPS, and SSH with IPv4 anywhere as the Source just like we created the previous security group. Then click on create security group.</p>
+        
+        
+        <br>
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-32.png?w=1024" alt="" class="wp-image-1972"/></figure>
+        
+        <br>
+        
+        <p>7. Go back to Security Groups dashboard and click on Create Security Groups again.</p>
+        
+                
+        <p>8. Enter Blog_EC2_Sec_Group for name and enter description (optional). Choose Blog-VPC from VPC list. We will not modify outbound connections and keep defaults for them. But for inbound connections click on Add rule and add HTTP, HTTPS, and SSH. For the SSH, source will be IPv4 anywhere but for HTTP and HTTPS the Source will be the Application Load Balancer security group which we just created earlier. By this way, traffic will come through Application Load Balancer to EC2 instances. To do that, enter ALB in the filter field and once you see Blog_ALB_Sec_Group, choose it for both HTTP and HTTPS.  Then click on create security group.</p>
+        
+        
+        <br>
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/securitygroup3.png?w=1024" alt="" class="wp-image-1977"/></figure>
+        
+        <br>
+        
+        <p>9. Go back to Security Groups dashboard and click on Create Security Groups again.</p>
+        <br>
+           
+        <p>10. Enter Blog_RDS_Sec_Group for name and enter description (optional). Choose Blog-VPC from VPC list. We will not modify outbound connections and keep defaults for them. But for inbound connections click on Add rule and add HTTP. We will only open port 3306 and we will use source as EC2 security group so that only connections from the EC2 group will be allowed to connect the RDS. Therefore, choose MySQL/Aurora from the Type dropdown menu and enter EC2 for source filter field. Once you see Blog_EC2_Sec_Group choose it and click on create security group.</p>
+        <br>
+        
+        <!-- wp:image {"align":"wide","id":1981,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/securitygroup4.png?w=1024" alt="" class="wp-image-1981"/></figure>
+        
+        
+        <br>
+        <h4 class="wp-block-heading">Step 7 Creating RDS</h4>
+        
+        <br>
+        
+        <p>Amazon Relational Database Service is a managed database service provided by AWS and supports many relational database engines, including Amazon Aurora, MySQL, MariaDB, PostgreSQL, Oracle, and Microsoft SQL Server. For the project, I will use RDS MySQL and leave the management to AWS.</p>
+        <br>
+        <p>1. Go to RDS service</p>
+        
+        
+        <br>
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-33.png?w=946" alt="" class="wp-image-1983"/></figure>
+        
+        <br>
+        
+        <p>2. First, we should create a subnet group to specify the subnets where our DB instances will reside. Therefore, click on subnet groups from the left pane and then click on Create DB subnet group.</p>
+        
+        
+        
+        <p>3. Enter Blog_RDS_Subnet_Group for name and a description (optional). Then select Blog-VPC from the VPC list.</p>
+        
+        
+        
+        <p>4. For high availability, choose the two Availability Zones that we used when creating the VPC. Then select the private subnets from each AZ (RDS will be in private subnets). Finally, click on Create.</p>
+        
+        <br>
+        <!-- wp:image {"id":1985,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-34.png?w=613" alt="" class="wp-image-1985"/></figure>
+        
+        <br>
+        
+        <p>5. Now, go back to RDS Dashboard and click on Create Database.</p>
+        
+        
+        
+        <p>6. Choose Standart Create as database creation method and MySQL as database engine.</p>
+        
+        <br>
+        <!-- wp:image {"id":2020,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-35.png?w=763" alt="" class="wp-image-2020"/></figure>
+        
+        
+        <br>
+        <p>7. Scroll down to Engine Version and select 8.0.28 from the Version list. Also choose Free Tier as the template (If you want Multi-AZ deployment, you can opt for Production or Dev/Test).</p>
+        <br>
+        
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-36.png?w=757" alt="" class="wp-image-2022"/></figure>
+        <br>
+        
+        
+        <p>8. In the Settings section, enter Blog-RDS as DB instance identifier, admin as Master username and Testing1234 as the Password (You can use any username and password but have to modify settings.py for the blog application accordingly).</p>
+        
+        <br>
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-37.png?w=761" alt="" class="wp-image-2024"/></figure>
+        
+        <br>
+        
+        <p>9. For instance configuration, choose Burstable classes as instance class and db.t2.micro as instance type. In terms of storage, choose 25 GB for allocated storage and enable storage autoscaling with up to 100GB maximum storage threshold.</p>
+        
+        <br>
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-38.png?w=763" alt="" class="wp-image-2025"/></figure>
+        
+        
+        <br>
+        <p>10. In Connectivity, scroll down to VPC list and choose Blog-VPC. Since we only have one subnet group, blog_rds_subnet_group will be automatically populated in DB subnet group section. If not, choose blog_rds_subnet_group from the list. Also, remove the default security group by clicking on the X button next to it and choose Blog_RDS_Sec_Group from the Existing VPC security groups list. Public access will be No.</p>
+        
+        
+        <br>
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-39.png?w=759" alt="" class="wp-image-2027"/></figure>
+        
+        
+        <br>
+        <p>11. Make sure that the port is 3306 in additional configuration and password authentication is selected in Database authentication.</p>
+        
+        
+        <br>
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-40.png?w=761" alt="" class="wp-image-2030"/></figure>
+        
+        <br>
+        
+        <p>12. Scroll down to Additional Configuration under Monitoring section and click on the little arrow to expand it.  Enter mydatabase for Initial Database Name.</p>
+        
+        <br>
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-41.png?w=761" alt="" class="wp-image-2032"/></figure>
+        
+        <br>
+        
+        <p>13. For Backup, check enable automated backups and enter 7 as retention period. Also choose window for backup windows and choose 02:00 UTC as start time. Check Audit and Error logs as Log reports.</p>
+        <br>
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-42.png?w=764" alt="" class="wp-image-2033"/></figure>
+        
+        <br>
+        
+        <p>14. For maintenance, enable auto minor version upgrade and choose a window for Monday 04:00 UTC. Then click on Create database to create the RDS database.</p>
+        <br>
+        
+        
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-43.png?w=762" alt="" class="wp-image-2035"/></figure>
+        <br>
+        <h4 class="wp-block-heading">Step 8 Creating S3 Buckets</h4>
+        
+        <br>
+        
+        <p>We will create two buckets for the project. The first one will be used to store the images that will be uploaded by bloggers while the second bucket will be used for failover scenario.</p>
+        
+        <br>
+        
+        <p>1. Go to S3 service and click on Create Bucket.</p>
+        <br>
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-44.png?w=1024" alt="" class="wp-image-2039"/></figure>
+        
+        <br>
+        
+        <p>2. Bucket names must be unique, so enter ENTERYOURNAMEHEREblog as the name. For region, choose N.Virginia and select ACLs enabled and Bucket owner preferred for Object Ownership.</p>
+        
+        
+        <br>
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-47.png?w=805" alt="" class="wp-image-2045"/></figure>
+        
+        
+        
+        <p>3.  Uncheck Block all public access and acknowledge the warning. Leave the rest to defaults and hit on Create Bucket.</p>
+        
+        
+        <!-- wp:image {"id":2043,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-46.png?w=797" alt="" class="wp-image-2043"/></figure>
+        
+        
+        
+        <p>4. Go back to S3 dashboard and click on Create bucket again (At this point, we will create a bucket for Failover scenario, but you must have a domain name from Route 53). Enter myblog.YOURDOMAINNAME as name, choose N.Virginia as region, and select ACLs enabled and Bucket owner preferred for Object Ownership.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2046,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-48.png?w=994" alt="" class="wp-image-2046"/></figure>
+        
+        
+        
+        <p>5.  Uncheck Block all public access and acknowledge the warning. Leave the rest to defaults and hit on Create Bucket.</p>
+        
+        
+        
+        <p>6. Click on the newly created bucket with your domain name from the list. Then click on Properties tab.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2049,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-49.png?w=1024" alt="" class="wp-image-2049"/></figure>
+        
+        
+        
+        <p>7. Scroll down to the bottom and click on Edit Static website hosting. Choose Enable for Static website hosting and then enter index.html for Index document. Leave the rest to defaults and save changes.</p>
+        
+        
+        <!-- wp:image {"id":2051,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-50.png?w=801" alt="" class="wp-image-2051"/></figure>
+        
+        
+        
+        <p>8. Now click on objects tab and click on upload. </p>
+        
+        
+        
+        <p>9. Click on add files and choose files for failover scenario (Index.html and under-construction.jpg).</p>
+        
+        
+        <!-- wp:image {"id":2054,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-51.png?w=756" alt="" class="wp-image-2054"/></figure>
+        
+        
+        
+        <p>10. Then click on permissions and choose Grant public-read access and check the warning below. Then click on upload.</p>
+        
+        
+        <!-- wp:image {"id":2056,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-52.png?w=735" alt="" class="wp-image-2056"/></figure>
+        
+        
+        
+        <p>11. Go back to buckets list and click on this bucket (with your domain name) again. </p>
+        
+        
+        
+        <p>12. Click on properties tab and scroll down to the bottom where it says Static website hosting. You will see the link for the static website. Click to open the link.</p>
+        
+        
+        <!-- wp:image {"id":2058,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-53.png?w=844" alt="" class="wp-image-2058"/></figure>
+        
+        
+        
+        <p>13. Here is the failover scenario. </p>
+        
+        
+        <!-- wp:image {"id":2061,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-55.png?w=1024" alt="" class="wp-image-2061"/></figure>
+        
+        
+        <!-- wp:heading {"level":4} -->
+        <h4 class="wp-block-heading">Step 9 Preparing Repository</h4>
+        
+        
+        
+        <p>Blogging application will work on EC2 instances and EC2 instances will get the source code from a private GitHub repository. In the next steps, we will include the git clone commands in the user data so we will prepare the repository first.</p>
+        
+        
+        
+        <p>At this step assume that you are provided with the source code. </p>
+        
+        
+        
+        <p>1. Create a private repo and commit the source code</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2063,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-56.png?w=1024" alt="" class="wp-image-2063"/></figure>
+        
+        
+        
+        <p>2. Modify settings.py under cblog to add RDS endpoint, RDS credential information and S3 bucket name. Make sure that the USER name is the same user name that you entered when creating the RDS database. Also NAME is the name of the database that you entered when creating the RDS database.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2071,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-60.png?w=855" alt="" class="wp-image-2071"/></figure>
+        
+        
+        <!-- wp:image {"align":"wide","id":2069,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-59.png?w=683" alt="" class="wp-image-2069"/></figure>
+        
+        
+        
+        <p>3. Note that the password is not hardcoded. We will include password information in a .env file. So modify the .env file to include the password that you entered when creating the database.</p>
+        
+        
+        <!-- wp:image {"id":2067,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-58.png?w=635" alt="" class="wp-image-2067"/></figure>
+        
+        
+        
+        <p>4.  Do not forget to commit all the changes.</p>
+        
+        
+        <!-- wp:heading {"level":4} -->
+        <h4 class="wp-block-heading">Step 10 Preparing User data for Launch Template</h4>
+        
+        
+        
+        <p>Blogging application is built with Django Framework and it requires certain software to be installed on EC2 instances to be able to run flawlessly. Also, we will need git software to be able to clone our repository. Also, we will need to include a GitHub token to access our private repo. At this point I assume that you already have a GitHub token. If not, you can get one from GitHub through Settings-developer settings-Personal access tokens-Tokens.</p>
+        
+        
+        <!-- wp:image {"id":2072,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-61.png?w=607" alt="" class="wp-image-2072"/></figure>
+        
+        
+        <!-- wp:heading {"level":4} -->
+        <h4 class="wp-block-heading">Step 11 Creating a NAT instance</h4>
+        
+        
+        
+        <p>In the architecture, EC2 instances are placed in a private subnet without Internet access. We will use a NAT instance to grant EC2 instances Internet access.</p>
+        
+        
+        
+        <p>1. Go to EC2 service and click on launch instance.</p>
+        
+        
+        <!-- wp:image {"id":2074,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-62.png?w=943" alt="" class="wp-image-2074"/></figure>
+        
+        
+        
+        <p>2. Enter Blog NAT Instance as name and then scroll down to Amazon Machine Images.  Click on Browse More AMIs and then enter "nat" in the search bar and hit enter. You have the below screen with four tabs. Choose Community AMIs and from the community AMIs, select the first one (amzn-ami-vpc-nat-2018.03.0.20221018.0-x86_64-ebs).</p>
+        
+        
+        <!-- wp:list {"ordered":true} -->
+        <ol>
+        <li></li>
+        </ol>
+        <!-- /wp:list -->
+        
+        <!-- wp:image {"align":"wide","id":2078,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-64.png?w=1024" alt="" class="wp-image-2078"/></figure>
+        
+        
+        
+        <p>3. You will be back at the EC2 launch screen. Choose t2.micro as the instance type, and your own keypair. </p>
+        
+        
+        <!-- wp:image {"id":2079,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-65.png?w=775" alt="" class="wp-image-2079"/></figure>
+        
+        
+        
+        <p>4. Scroll down to Network settings and click on edit on the right. Then from the VPC list choose Blog-VPC and from subnets select Blog-public-subnet-1A (any of your public subnets). In terms of security groups, choose existing and then select Blog_NAT_Sec_Group from the list. </p>
+        
+        
+        <!-- wp:image {"id":2081,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-66.png?w=780" alt="" class="wp-image-2081"/></figure>
+        
+        
+        
+        <p>5. When finished click on launch instance.</p>
+        
+        
+        
+        <p>6. Go back to EC2 dashboard to see all instances and select the newly created NAT instance. Then click on Actions-Networking-Change source/destination check. When opened, put a tick mark next to Stop and then save.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2083,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-67.png?w=1024" alt="" class="wp-image-2083"/></figure>
+        
+        
+        <!-- wp:image {"id":2085,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-68.png?w=599" alt="" class="wp-image-2085"/></figure>
+        
+        
+        
+        <p>7. Now that we have the NAT instance running, we should add it as target for private route tables so that the instances on private subnet can use this instance to connect to Internet. Go to VPC service again and click on Route Tables from left pane. Select Blog-private-RT and click on routes tab. Then click on edit routes.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2088,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-69.png?w=1024" alt="" class="wp-image-2088"/></figure>
+        
+        
+        
+        <p>8. Select Blog-private-RT and click on routes tab. Hit on edit routes and then click on add route. For destination enter 0.0.0.0/0 then for target choose instance. Once NAT instance is shown select it and save changes.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2090,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-70.png?w=1024" alt="" class="wp-image-2090"/></figure>
+        
+        
+        <!-- wp:heading {"level":4} -->
+        <h4 class="wp-block-heading">Step 12 Creating IAM role for Launch Template</h4>
+        
+        
+        
+        <p>Blogging application will run on EC2 instances and when users upload pictures they will be saved in a S3 bucket. Therefore, EC2 instances will need access to S3 buckets. We will achieve this by using an IAM role.</p>
+        
+        
+        
+        <p>1. Go to  Identity and Access Management service.</p>
+        
+        
+        <!-- wp:image {"id":2092,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-71.png?w=1024" alt="" class="wp-image-2092"/></figure>
+        
+        
+        
+        <p>2. Click on Roles from left pane and then click on Create role on the right.</p>
+        
+        
+        
+        <p>3.  Choose AWS as Trusted entity and EC2 as use case and then click on next.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2094,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-72.png?w=1024" alt="" class="wp-image-2094"/></figure>
+        
+        
+        
+        <p>4.  Enter S3 in search bar and hit enter. Once the list is populated, choose AmazonS3FullAccess and hit on next.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2096,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-73.png?w=1024" alt="" class="wp-image-2096"/></figure>
+        
+        
+        
+        <p>5. Enter Blog_EC2_S3_Full_Access for name and provide a description (optional). Then click on create role on bottom right.</p>
+        
+        
+        <!-- wp:heading {"level":4} -->
+        <h4 class="wp-block-heading">Step 13 Creating Launch Template</h4>
+        
+        
+        
+        <p>1. Go to EC2 service, click on Launch templates from left pane and then click on Create launch template on the right.</p>
+        
+        
+        
+        <p>2. Enter Blog_launch_template for name and Blog Web Page version 1 for description.</p>
+        
+        
+        
+        <p>3. Scroll down to Application and OS Images and hit on quick start. Then click on ubuntu and choose Ubuntu 18.04 from the list.</p>
+        
+        
+        <!-- wp:image {"id":2098,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-74.png?w=755" alt="" class="wp-image-2098"/></figure>
+        
+        
+        
+        <p>4. Choose t2.micro for instance type and select your own key pair. In terms of security groups, choose existing security groups and select Blog_EC2_sec_group from the list.</p>
+        
+        
+        <!-- wp:image {"id":2103,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-77.png?w=778" alt="" class="wp-image-2103"/></figure>
+        
+        
+        
+        <p>5. Scroll down to Advance Details and hit on it to expand. Click on the little arrow for the IAM instance profile section and select the Blog_EC2_S3_Full_Access role we just created.</p>
+        
+        
+        <!-- wp:image {"id":2104,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-78.png?w=776" alt="" class="wp-image-2104"/></figure>
+        
+        
+        
+        <p>6. Scroll down to User data section and paste the user data that we prepared earlier. Then click on create.</p>
+        
+        
+        <!-- wp:code -->
+        <pre class="wp-block-code"><code>#<span style="background-color: initial;font-family: inherit;font-size: inherit;color: var(--wp--preset--color--foreground)">!/bin/bash</span><code>apt-get update -y
+        apt-get install git -y
+        apt-get install python3 -y
+        cd /home/ubuntu/
+        TOKEN="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        git clone https://$TOKEN@
+        cd /home/ubuntu/
+        apt install python3-pip -y
+        apt-get install python3.7-dev default-libmysqlclient-dev -y
+        pip3 install -r requirements.txt
+        cd /home/ubuntu//src
+        python3 manage.py collectstatic --noinput
+        python3 manage.py makemigrations
+        python3 manage.py migrate
+        python3 manage.py runserver 0.0.0.0:80</code></code></pre>
+        <!-- /wp:code -->
+        
+        <!-- wp:heading {"level":4} -->
+        <h4 class="wp-block-heading">Step 13 Creating Application Load Balancer and Target Group</h4>
+        
+        
+        
+        <p>Application load balancer will distribute the incoming traffic for our blog application to EC2 instances to balance their workload.</p>
+        
+        
+        
+        <p>1. While still on EC2 service, select Load Balancers from the left pane and hit on Create load balancer. </p>
+        
+        
+        
+        <p>2. We will use an application load balancer so click on create under Application Load Balancer.</p>
+        
+        
+        
+        <p>3. Enter BlogALB as the name. Scheme will be Internet-facing and IP address type will be IPv4.</p>
+        
+        
+        <!-- wp:image {"id":2111,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-79.png?w=873" alt="" class="wp-image-2111"/></figure>
+        
+        
+        
+        <p>4. Under Network mappings, choose Blog-VPC from the VPC list and then choose the two AZs we used in our VPC. When subnets lists are populated, select the public ones for each AZ.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2112,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-80.png?w=1024" alt="" class="wp-image-2112"/></figure>
+        
+        
+        
+        <p>5. Choose existing security groups and select Blog-VPC_ALB_Sec_group</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2114,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-81.png?w=1006" alt="" class="wp-image-2114"/></figure>
+        
+        
+        
+        <p>6. Under Listeners and Routing, we will enter Protocol Type and port as well as target information. However, we have not created a target yet. So click on Create target group to handle target creation process.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2116,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-82.png?w=1024" alt="" class="wp-image-2116"/></figure>
+        
+        
+        
+        <p>7. A new browser windows opens for target creation menu. Select Instances as target type and enter BlogTargetGroup for name.</p>
+        
+        
+        <!-- wp:image {"id":2118,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-83.png?w=846" alt="" class="wp-image-2118"/></figure>
+        
+        
+        
+        <p>8. Since we selected Blog-VPC in load balancer menu, VPC is automatically populated as Blog-VPC, and the protocol is HTTP with port 80. Protocol version is HTTP1. Leave health check protocol as HTTP and the path as / and then click on Advanced health check settings.</p>
+        
+        
+        <!-- wp:image {"id":2121,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-85.png?w=808" alt="" class="wp-image-2121"/></figure>
+        
+        
+        
+        <p>9. We can specify healthy threshold values here as we desire. However, I will keep the defaults because they work for me. You can change any of the values here and they are self-explanatory. Basically, what they do is to continuously check the EC2 instances and determine whether they are working healthily. Click next to continue.</p>
+        
+        
+        <!-- wp:image {"id":2123,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-86.png?w=816" alt="" class="wp-image-2123"/></figure>
+        
+        
+        
+        <p>10. Normally on this page we can register existing EC2 instances as targets. However, we will not do that. We will use autoscaling to create EC2 instances from the launch template we created earlier and in that process, we will attach this target group with the load balancer to our EC2 instances. So just click on Create Target Group to finish creating the target group.</p>
+        
+        
+        
+        <p>11. Now go back to the previous browser screen where we we were in the process of creating the load balancer. Click on the refresh icon first and then select the BlogTargetGroup we just created as Forward to target.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2125,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-87.png?w=1024" alt="" class="wp-image-2125"/></figure>
+        
+        
+        
+        <p>12. Click on Add listener. Enter HTTPS for Protocol and 443 for Port and then select BlogTargetGroup as Forward to target. Since this is a secure listener, scroll down and select your certificate from ACM (assuming that you have created a certificate for your domain name). Then click on Create load balancer.</p>
+        
+        
+        <!-- wp:image {"id":2126,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-88.png?w=1024" alt="" class="wp-image-2126"/></figure>
+        
+        
+        
+        <p>13. Click on View load balancer to go to the load balancers list. Here, we will modify the listeners so that the load balancer will always redirect HTTP requests to secure HTTPS. Therefore, select BlogALB and click on Listeners tab. Then check HTTP 80, click on Actions and hit on Edit Listener.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2128,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-89.png?w=1024" alt="" class="wp-image-2128"/></figure>
+        
+        
+        
+        <p>14. In the Listener details part, click on Remove.</p>
+        
+        
+        <!-- wp:image {"id":2130,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-90.png?w=766" alt="" class="wp-image-2130"/></figure>
+        
+        
+        
+        <p>15. Then under default actions add a rule to Redirect. Choose HTTPS for protocol, enter 443 for Port and save changes.</p>
+        
+        
+        <!-- wp:image {"id":2132,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-91.png?w=775" alt="" class="wp-image-2132"/></figure>
+        
+        
+        <!-- wp:heading {"level":4} -->
+        <h4 class="wp-block-heading">Step 14 Creating Auto Scaling Group</h4>
+        
+        
+        
+        <p>We want our blogging application to be highly scalable, so we will create an autoscaling group. If we have increasing traffic in the future, this ASG will increase the number of EC2 instances running our blogging application to scale up to mee the needs. </p>
+        
+        
+        
+        <p>1. While still on EC2 service, select Auto Scaling Groups on the left pane and click on Create Auto Scaling Group on the right.</p>
+        
+        
+        
+        <p>2. Enter Blog_ASC for name and choose the launch template that we created earlier and then click next.</p>
+        
+        
+        <!-- wp:image {"id":2136,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-92.png?w=801" alt="" class="wp-image-2136"/></figure>
+        
+        
+        
+        <p>Note: If you modify your launch template and save it again it will be in a different version. In that case, be sure to note that version and select it here in the Version field. Otherwise, it will be the default 1st version.</p>
+        
+        
+        
+        <p>3. Select Blog-VPC from the VPC list and then select the two private subnets we created with VPC. EC2 instances will be in private subnets and reach out to Internet through the NAT instance we created earlier. When finished, click next to continue.</p>
+        
+        
+        <!-- wp:image {"id":2138,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-93.png?w=778" alt="" class="wp-image-2138"/></figure>
+        
+        
+        
+        <p>4. At this step, we will attach the ASG to the load balancer we created in Step 13. Choose Attach to an existing load balancer option and then select the BlogTargetGroup from the target groups list. Also choose ELB for health checks and hit on next.</p>
+        
+        
+        <!-- wp:image {"id":2140,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-94.png?w=779" alt="" class="wp-image-2140"/></figure>
+        
+        
+        
+        <p>5. Here we will define the group size of the EC2 instances. The ASG will try to match the desired capacity (2) with going down to minimum (1) and without exceeding the maximum (4) size depending on the necessity. The necessity level we set here is the CPU Utilization Average. If it exceeds 70%, ASG will spin up new EC2 instances to scale up the compute resources. When finished, click on next.</p>
+        
+        
+        <!-- wp:image {"id":2142,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-95.png?w=787" alt="" class="wp-image-2142"/></figure>
+        
+        
+        
+        <p>6. At this step, we can setup a SNS notification to warn us whenever a change is made in the ASG. It is an optional step so I will skip this step and jump to review page. However, you can set up a notification by clicking on Add notification and following the instructions should you desire. Otherwise, click on skip to review and then click on create Auto Scaling Group.</p>
+        
+        
+        
+        <p>7. Now go back to EC2 dashboard to see the EC2 instances initiating by the ASG. It will take some time for them to boot up and start because of the user data we added to the launch template. But, as soon as the status check becomes 2/2 checks passed, we can check the blogging application through the load balancer.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2145,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-96.png?w=1024" alt="" class="wp-image-2145"/></figure>
+        
+        
+        
+        <p>8. Click on Load balancers from the left pane and then select BlogALB. Then from the details page, copy the DNS Name and paste it to your browser.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2149,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-98.png?w=1024" alt="" class="wp-image-2149"/></figure>
+        
+        
+        
+        <p>9. You will face a privacy warning. Just ignore it and click on Advanced. You may have a different warning depending on the type of your browser. Shown in the picture below is Chrome browser. After that click on proceed to DNS address.</p>
+        
+        
+        <!-- wp:image {"id":2147,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-97.png?w=739" alt="" class="wp-image-2147"/></figure>
+        
+        
+        
+        <p>10. There we go! We have the blogging application up and running</p>
+        
+        
+        <!-- wp:image {"id":2212,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-99.png?w=1024" alt="" class="wp-image-2212"/></figure>
+        
+        
+        <!-- wp:heading {"level":4} -->
+        <h4 class="wp-block-heading">Step 15 Creating CloudFront Distribution</h4>
+        
+        
+        
+        <p>Amazon CloudFront is a content delivery network (CDN) that speeds up the distribution of static and dynamic web content, such as HTML, CSS, JavaScript, images, and videos, to end-users worldwide. CloudFront integrates with other AWS services, including Amazon S3, EC2, Elastic Load Balancing, and Lambda@Edge. Here we will integrate it with our application load balancer.</p>
+        
+        
+        
+        <p>1. Go to CloudFront service and click on create a CloudFront distribution</p>
+        
+        
+        <!-- wp:image {"id":2215,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-100.png?w=1024" alt="" class="wp-image-2215"/></figure>
+        
+        
+        
+        <p>2.  For Origin Domain, choose BlogALB from Elastic load balancer (Not S3), for Protocol choose Match viewer with HTTP=80 and HTTPS=443 and leave the origin path blank which is actually defining the root as /.</p>
+        
+        
+        <!-- wp:image {"id":2217,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-101.png?w=688" alt="" class="wp-image-2217"/></figure>
+        
+        
+        
+        <p>3.  Scroll down until the Viewer part by leaving the values to defaults and then in Viewers part choose Redirect HTTP to HTTPS. Then for allowed HTTP Methods, choose the one with all the options (GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE) and check OPTIONS under Cache HTTP methods. Also do not restrict viewer access.</p>
+        
+        
+        <!-- wp:image {"id":2219,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-102.png?w=698" alt="" class="wp-image-2219"/></figure>
+        
+        
+        
+        <p>4. Under Cache key and origin requests, choose Legacy cache settings. From headers, choose İnclude the Following Headers options and add Accept, Accept-Charset, Accept-Datetime, Accept-Encoding, Accept-Language, Authorization,Cloudfront-Forwarded-Proto, Host, Origin, and Referrer. Also select All for both Query strings and Cookies.</p>
+        
+        
+        <!-- wp:image {"id":2223,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-103.png?w=797" alt="" class="wp-image-2223"/></figure>
+        
+        
+        
+        <p>5. Scroll down to Settings and use all edge locations for best performance. For Alternate domain name (CNAME), enter your domain. I will enter myblog.mehmetodabasi.net which I also specified as the S3 bucket name for the static website. If the field is not there click on Add item to bring it. Then from Custom SSL certificate, choose your certificate (if you have one). Finally click on Create distribution.</p>
+        
+        
+        
+        <p>6. When the distribution creation is over, copy the distribution domain name to use in the next step when configuring Route 53.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2275,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-129.png?w=827" alt="" class="wp-image-2275"/></figure>
+        
+        
+        <!-- wp:heading {"level":4} -->
+        <h4 class="wp-block-heading">Step 16 Creating Route 53 records with Failover scenario.</h4>
+        
+        
+        
+        <p>Although the blogging application is accessible through the application load balancer and CloudFront domain names, I want to provide a better experience for the visitors in terms of the DNS address of the blogging application by providing them an easy to remember domain name. Also, I need to set up a failover scenario in case the blogging app fails. </p>
+        
+        
+        
+        <p>1. Go to Route 53 service.</p>
+        
+        
+        <!-- wp:image {"id":2225,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-104.png?w=1024" alt="" class="wp-image-2225"/></figure>
+        
+        
+        
+        <p>2. Before the failover scenario, I will set up a health check that will monitor the blogging app. Therefore, click on health checks on the left pane and then hit on create health check.</p>
+        
+        
+        
+        <p>3. Provide a name for the health check (I entered Blog health check) and choose endpoint to monitor. Then, select Domain name for endpoint type. Protocol will be HTTP and port will be 80 while the path will stay blank.  Now, in terms of Domain name,we will use the CloudFront distribution domain name that we copied in the previous step. Just paste it into Domain name field. Make sure to delete the https:// part so that the distribution domain name starting with the letter d is entered in the field. Then click on next to proceed to the next page and hit on create health check at the bottom right. </p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2227,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-105.png?w=885" alt="" class="wp-image-2227"/></figure>
+        
+        
+        
+        <p>4. Now that we have the health check set up, we can create records for the blogging application. Click on Hosted Zones on the left pane. Click on your hosted zone and then hit on create record.</p>
+        
+        
+        
+        <p>5. Enter myblog before your domain name (or the prefix you selected). Turn on Alias and select CloudFront from the Route traffic to dropdown menu. Choose Failover for Routing policy, choose Primary for the Failover record type and select the health check ID that we just created. Finally, provide a name for the Record ID and click on Add another record without actually creating the record.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2228,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-106.png?w=1024" alt="" class="wp-image-2228"/></figure>
+        
+        
+        
+        <p>6. Enter the same name (myblog) as prefix and turn on Alias again. This time select S3 as website endpoint from the Route traffic to menu, choose your region and your s3 bucket. Routing policy will be Failover, but the record type will be Secondary this time. We do not need a health check for the secondary one so leave it as is and provide a name for Record ID and finally click on create records.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2230,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-107.png?w=1024" alt="" class="wp-image-2230"/></figure>
+        
+        
+        
+        <p>7. Now, it is time to check the blogging application. Just go to your browser and enter the domain name. I entered https://myblog.mehmetodabasi.net (Remember we enabled certificates so we can use secure connection). </p>
+        
+        
+        <!-- wp:image {"id":2232,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-108.png?w=1024" alt="" class="wp-image-2232"/></figure>
+        
+        
+        
+        <p>8. We got the blogging application up and running. However, we are not done yet. We want to create a DynamoDB table to store the list of images uploaded to S3 buckets through the blogging application.</p>
+        
+        
+        <!-- wp:heading {"level":4} -->
+        <h4 class="wp-block-heading">Step 17 Creating DynamoDB Table</h4>
+        
+        
+        
+        <p>1. Go to DynamoDB service and click on Create table on the right.</p>
+        
+        
+        <!-- wp:image {"id":2234,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-109.png?w=1024" alt="" class="wp-image-2234"/></figure>
+        
+        
+        
+        <p>2. Enter Blog-Table for name and id as Partition key, leave the rest to defaults and hit on create table. In the next step, we will use a Python code as Lambda function, and we must match the table name in that code with what we write here.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2236,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-110.png?w=816" alt="" class="wp-image-2236"/></figure>
+        
+        
+        <!-- wp:heading {"level":4} -->
+        <h4 class="wp-block-heading">Step 18 Creating a Role for Lambda</h4>
+        
+        
+        
+        <p>As I mentioned earlier, we will use a Lambda function to trigger the S3-DynamoDb service interaction for the images uploaded to the blogging app. For this, we will need to define a role.</p>
+        
+        
+        
+        <p>1. Go to IAM service again, choose roles from the left pane and click on create role.</p>
+        
+        
+        <!-- wp:image {"id":2286,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-131.png?w=1024" alt="" class="wp-image-2286"/></figure>
+        
+        
+        
+        <p>2. For trusted entity type, select AWS servcies and for Use case select Lambda. Then click on next.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2238,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-111.png?w=1024" alt="" class="wp-image-2238"/></figure>
+        
+        
+        
+        <p>3.  Choose DynamoDBFullaccess, Networkadministrator, and s3Fullaccess from the policy list. Then click on next, provide a name for the role and click on create role.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2240,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-112.png?w=1024" alt="" class="wp-image-2240"/></figure>
+        
+        
+        <!-- wp:heading {"level":4} -->
+        <h4 class="wp-block-heading">Step 19 Creating Lambda function</h4>
+        
+        
+        
+        <p>1. Go to Lambda service and click on create function.</p>
+        
+        
+        <!-- wp:image {"id":2242,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-113.png?w=1024" alt="" class="wp-image-2242"/></figure>
+        
+        
+        
+        <p>2. Choose author from scratch option Go to Lambda service, provide a name and then choose Python 3.8 from the Runtime dropdown menu.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2244,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-114.png?w=1024" alt="" class="wp-image-2244"/></figure>
+        
+        
+        
+        <p>3. Expand the Change default execution role menu, select existing role, and choose the lambda role that we just created.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2246,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-115.png?w=1024" alt="" class="wp-image-2246"/></figure>
+        
+        
+        
+        <p>4. Select Enable VPC and then the Blog-VPC from the VPC list. In terms of subnets, choose all the subnets in the Blog-VPC and then choose the default security group of Blog-VPC and hit on create function.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2248,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-116.png?w=1024" alt="" class="wp-image-2248"/></figure>
+        
+        
+        <!-- wp:heading {"level":4} -->
+        <h4 class="wp-block-heading">Step 20 Creating events in S3</h4>
+        
+        
+        
+        <p>1. Go to S3 service and click on Buckets</p>
+        
+        
+        
+        <p>2. Select your blog bucket (not the failover one with your domain name). Mine is blogodabashiblog.</p>
+        
+        
+        
+        <p>3. Go to Permissions tab and scroll down until you see Event notifications. Click on Create event notification on the right.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2250,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-117.png?w=1024" alt="" class="wp-image-2250"/></figure>
+        
+        
+        
+        <p>4. Provide a name for the event, choose media/ for prefix (it is coded like this in the blog application source code), and select both all create and all removal events.</p>
+        
+        
+        <!-- wp:image {"id":2252,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-118.png?w=799" alt="" class="wp-image-2252"/></figure>
+        
+        
+        
+        <p>5. In terms of destination, choose Lambda functions and select the Blog-lambda-function that we created earlier. Then save changes.</p>
+        
+        
+        <!-- wp:image {"id":2254,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-119.png?w=804" alt="" class="wp-image-2254"/></figure>
+        
+        
+        <!-- wp:heading {"level":4} -->
+        <h4 class="wp-block-heading">Step 20 Adding triggers for events in S3</h4>
+        
+        
+        
+        <p>1. Go back to Lambda service again and select the function you created from functions. Then click on Add trigger.</p>
+        
+        
+        <!-- wp:image {"id":2258,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-121.png?w=1024" alt="" class="wp-image-2258"/></figure>
+        
+        
+        
+        <p>2. For trigger configuration, choose S3 from the dropdown menu and select All object delete events from the Event type. Check the I Acknowledge section and click on Add.</p>
+        
+        
+        <!-- wp:image {"id":2259,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-122.png?w=811" alt="" class="wp-image-2259"/></figure>
+        
+        
+        
+        <p>3. Click on Add trigger once more and choose S3 again from the dropdown menu. This time, select All object create events from the Event type. Check the I Acknowledge section and click on Add.</p>
+        
+        
+        
+        <p>4. Now that we have triggers both for image creation and removal, we can go ahead and write the python function which our developers had prepared.</p>
+        
+        
+        
+        <p>5. While in the Blog-lambda-function, select the Code tab. You will see a three-line code there. Delete that code and paste the code below. Then click on Deploy next to Test button.</p>
+        
+        
+        <!-- wp:code -->
+        <pre class="wp-block-code"><code><kbd><code>import json
+        import boto3
+        def lambda_handler(event, context):
+        &nbsp; &nbsp; s3 = boto3.client("s3")
+        &nbsp; &nbsp; if event:
+        &nbsp; &nbsp; &nbsp; &nbsp; print("Event: ", event)
+        &nbsp; &nbsp; &nbsp; &nbsp; filename = str(event&#91;'Records']&#91;0]&#91;'s3']&#91;'object']&#91;'key'])
+        &nbsp; &nbsp; &nbsp; &nbsp; timestamp = str(event&#91;'Records']&#91;0]&#91;'eventTime'])
+        &nbsp; &nbsp; &nbsp; &nbsp; event_name = str(event&#91;'Records']&#91;0]&#91;'eventName']).split(':')&#91;0]&#91;6:]
+        &nbsp; &nbsp; &nbsp; &nbsp; filename1 = filename.split('/')
+        &nbsp; &nbsp; &nbsp; &nbsp; filename2 = filename1&#91;-1]
+        &nbsp; &nbsp; &nbsp; &nbsp; dynamo_db = boto3.resource('dynamodb')
+        &nbsp; &nbsp; &nbsp; &nbsp; dynamoTable = dynamo_db.Table('Blog-Table')
+        &nbsp; &nbsp; &nbsp; &nbsp; dynamoTable.put_item(Item = {
+        &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 'id': filename2,
+        &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 'timestamp': timestamp,
+        &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 'Event': event_name,
+        &nbsp; &nbsp; &nbsp; &nbsp; })
+        &nbsp; &nbsp; return "Lambda success"</code></kbd></code></pre>
+        <!-- /wp:code -->
+        
+        
+        <p>5. Now click on Deploy next to Test button.</p>
+        
+        
+        <!-- wp:image {"id":2262,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-123.png?w=767" alt="" class="wp-image-2262"/></figure>
+        
+        
+        <!-- wp:heading {"level":4} -->
+        <h4 class="wp-block-heading">Step 21 Registering and posting on Blog application.</h4>
+        
+        
+        
+        <p>1. Go to your browser and enter your blog domain address. I entered myblog.mehmetodabasi.net.</p>
+        
+        
+        <!-- wp:image {"id":2335,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-132.png?w=1019" alt="" class="wp-image-2335"/></figure>
+        
+        
+        
+        <p>2. Click on Register on the right. Then fill the form to register yourself.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2264,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-124.png?w=981" alt="" class="wp-image-2264"/></figure>
+        
+        
+        
+        <p>3. Click on Login to enter the site with the credentials you just created for yourself.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2265,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-125.png?w=1013" alt="" class="wp-image-2265"/></figure>
+        
+        
+        
+        <p>4. Click on New Post and create a post. Enter a title, a text message for content, and attach a picture by choosing a file. For the Status, make sure to select Published. Then hit on Post.</p>
+        
+        
+        <!-- wp:image {"id":2267,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-126.png?w=501" alt="" class="wp-image-2267"/></figure>
+        
+        
+        
+        <p>5. Click on New Post and create a post. Enter a title, a text message for content, and attach a picture by choosing a file. For the Status, make sure to select Published. Then hit on Post.</p>
+        
+        
+        <!-- wp:image {"id":2340,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/web4.png?w=1024" alt="" class="wp-image-2340"/></figure>
+        
+        
+        
+        <p></p>
+        
+        
+        
+        <p>5. As you see, my posts were successful. Now, let's go and check the images on the S3 bucket. Go to S3 Service and select the blog bucket.</p>
+        
+        
+        
+        <p>6. Click on the media folder to open it and then click on blog and 1 respectively to see the images I uploaded to blogging application.</p>
+        
+        
+        <!-- wp:image {"align":"wide","id":2269,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image alignwide size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-127.png?w=1024" alt="" class="wp-image-2269"/></figure>
+        
+        
+        
+        <p>7. They are there so everything seems to be working perfectly.</p>
+        
+        
+        
+        <p>8. Now, let's check the DynamoDB table to see if the Lambda function worked and triggered S3 to create objects and write them on a DynamoDB table.</p>
+        
+        
+        
+        <p>9. Go to DynamoDB service, click on tables from the left pane and then hit on Explore items. There we go. The list of the images are there just like we planned.</p>
+        
+        
+        <!-- wp:image {"id":2271,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-128.png?w=1024" alt="" class="wp-image-2271"/></figure>
+        
+        
+        <!-- wp:heading {"textAlign":"center","level":3} -->
+        <h3 class="wp-block-heading has-text-align-center">WELL DONE! </h3>
+        
+        
+        <!-- wp:heading {"textAlign":"center","level":3,"align":"wide"} -->
+        <h3 class="wp-block-heading alignwide has-text-align-center">We have successfully created a Three-Tier architecture for our blogging application and deployed it online for our visitors!</h3>
+        
+        
+        
+        <p></p>
+        
+        
+        <!-- wp:heading {"level":4} -->
+        <h4 class="wp-block-heading">Step 21  Clean-up process.</h4>
+        
+        
+        
+        <p>If you followed along, you can clean up the infrstructure by following the Clean Up order.</p>
+        
+        
+        <!-- wp:quote {"className":"is-style-plain"} -->
+        <blockquote class="wp-block-quote is-style-plain"><!-- wp:preformatted -->
+        <pre class="wp-block-preformatted">1. Lambda Function
+        2. RDS 
+        3. RDS Subnet Group
+        4. CloudFront&gt;&gt;&gt;&gt;&gt;Disable&gt;&gt;&gt;&gt;&gt;&gt;Delete
+        5. DynamoDB table
+        6. Route 53 healthcheck
+        7. Route 53 failover records
+        8. S3 buckets (first objects)
+        9. IAM roles
+        10. NAT instance &gt;&gt;&gt;&gt;&gt;terminate
+        11. Application Load Balancer
+        12. Target Group
+        13. Launch Template
+        14. Auto Scaling Group
+        15. Endpoint
+        16. Internet gateway&gt;&gt;&gt;&gt;&gt;detach&gt;&gt;&gt;&gt;&gt;delete
+        17. Subnets
+        18. Private RT
+        19. Blog-VPC</pre>
+        <!-- /wp:preformatted --></blockquote>
+        <!-- /wp:quote -->
+        
+        <!-- wp:image {"id":2348,"sizeSlug":"large","linkDestination":"none"} -->
+        <figure class="wp-block-image size-large"><img src="https://dailyescapehub.files.wordpress.com/2023/03/image-133.png?w=801" alt="" class="wp-image-2348"/></figure>
+        </div>
+    <footer>
+      <p>&#169; 2023 Mehmet Odabasi</p>
+    </footer>
+  </body>
+</html>

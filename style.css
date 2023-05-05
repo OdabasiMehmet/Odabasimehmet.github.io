@@ -309,3 +309,19 @@ header .homesocials a:hover {
   color: rgb(3, 144, 226);
   font-size: 2.4rem;
 }
+.showWhite {
+  
+  display: grid;
+  padding: 5rem;
+  color:rgba(12, 12, 12, 0.837);
+  font-size: 1.2rem;
+  line-height: 1.5;
+  margin: 1rem 0;
+  padding: 5rem;
+  background-color: #ffffff;
+}
+.showWhite img {
+  display: block;
+  margin: 0 auto;
+  }
+
