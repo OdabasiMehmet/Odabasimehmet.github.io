@@ -325,3 +325,16 @@ header .homesocials a:hover {
   margin: 0 auto;
   }
 
+  .resume button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    margin-right: 10px;
+    cursor: pointer;
+  }
+  
+  .resume button:hover {
+    background-color: #3e8e41;
+  }
+  
