@@ -1,1 +1,157 @@
-# Microservices
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AWS-3-tier</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="shortcut icon" href="images/fav-lotus.png" type="image/x-icon" />
+    <script
+      src="https://kit.fontawesome.com/12dbc08a40.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body id="certbody">
+    <header class="otherheader">
+      <h1><span id="title">Mehmet</span> <span id="title2">Odabasi</span></h1>
+      <nav class="socials">
+        <a href="https://www.linkedin.com/in/mehmet-odabasi/" target="_blank"
+          ><i class="fa-brands fa-linkedin"></i
+        ></a>
+        <a href="https://twitter.com/mehmetodabashi" target="_blank"
+          ><i class="fa-brands fa-twitter"></i
+        ></a>
+        <a href="https://medium.com/@mehmetodabashi" target="_blank"
+          ><i class="fa-brands fa-medium"></i
+        ></a>
+        <a href="https://github.com/OdabasiMehmet" target="_blank"
+          ><i class="fa-brands fa-github"></i
+        ></a>
+      </nav>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="articles.html">Articles</a>
+        <a href="certifications.html" style="color: #09c7e9">Certifications</a>
+        <a href="portfolio.html">Portfolio</a>
+      </nav>
+    </header>
+      <div class="showWhite"> 
+        
+        <h2 style="text-align: center;">Microservices Project</h2>
+<br>
+ 
+
+I worked on a fully automated micro-services application project. It was
+a Dockerized Web Application developed in Java Springboot using Spring Cloud Frameworks
+and integrated with MySQL database. 
+<br>
+<br>
+The project was to create full microservices, CI/CD Pipelines, and deployment on a Kubernetes cluster with monitoring. Kubernetes cluster was
+created and managed with Rancher. Jenkins was used as the CI/CD automation tool and
+we created all the infrastructure on AWS EC2 Service. Also, we used Git as the version
+control system during the whole process. We prepared base branches namely master, dev,
+and release for the DevOps cycle.
+<br>
+<br>
+The code was developed in Java and Maven was used as the build tool. So I used Maven
+Wrapper for the testing, packaging, and installing phases. I spun up the development server
+through terraform. I also prepared Dockerfiles for each microservices and helm charts to
+deploy the application to the Kubernetes Cluster.
+
+<br>
+<br>
+Firstly, we tested the application on a local environment using docker-compose. Then we
+deployed the applications to the Kubernetes Cluster.
+ 
+To create Kubernetes manifest files we used Kompose. We converted the
+Docker-compose files to Kubernetes definition files by using the Kompose tool. We also
+used the Helm tool to automate the creation, packaging, configuration, and deployment of
+applications and services.
+
+<br>
+<br>
+ 
+Our app was running on AWS and we used Terraform as Infrastructure as a Code (IaaS) to
+automate the creation of infrastructure in each pipeline. We used Ansible to configure the
+instances and prepared some playbooks for this purpose. Since we used the AWS Cloud
+platform, I prepared a dynamic inventory that included EC2 instances into the inventory by
+checking their tags. In addition, to be able to connect Ansible to our EC2 instances, I wrote
+an Ansible config file within the Jenkins pipeline. 
+
+<br>
+<br>
+As DevOps engineers, we prepare development servers for developers. I set up Jenkins
+Server and installed some plugins such as Docker Pipeline, GitHub Integration, and Jacoco.
+<br>
+<br>
+<h3>My responsibilities were:</h3>  
+
+<br>
+
+<ol>
+    <li>CI/CD Pipeline. I was responsible for writing CI/CD pipeline scripts for each stage 
+        and keeping them up and running. I've created the nightly and weekly pipelines by 
+        using Jenkins. I was responsible for creating Dockerfiles and building images. </li>
+<br>
+    <li>Our Project was running on AWS, so I was in charge of configuring all services that 
+            we used in AWS.</li>
+   <br>         
+    <li>I was also responsible for writing the Kubernetes manifest files and Helm charts. I  
+        created the Helm charts for the staging and production environment.</li>
+</ol>
+
+<br>
+<h3>The steps in the nightly build of the project</h3> 
+<br>
+
+<ol>
+    <li>First, we created AWS ECR Repo to store images using AWS CLI.</li>
+    <li>Secondly, we packaged the app into jars with Maven Wrapper.</li>
+    <li>Then we prepared image tags for Docker Images.</li>
+    <li>Next, we built App Docker Images.</li>
+    <li>We prepare helm charts for the application and push AWS S3 Service.</li>
+    <li>After that, we pushed the images to the ECR Repo using AWS CLI.</li>
+    <li>And then we created a key pair for Ansible and prepared ansible.config file and 
+        inventory files.</li>
+    <li>Following this, we created a QA automation infrastructure by using Terraform.</li>
+    <li>Then, we created a Kubernetes cluster for QA automation build using Ansible.</li>
+    <li>Next, we deployed the App on the Kubernetes cluster using the Helm charts.</li>
+    <li>After that, we run Functional Tests on QA Environment using the Ansible playbook 
+        file. We automated functional tests with Selenium.</li>
+    <li>Finally, we set the pipeline to delete all local images, the repository, and the 
+        infrastructure automatically.</li>
+    <li>The next day morning, we check the Jenkins logs to see if there is any error or failed 
+        job and then check the Grafana dashboards to see the performance or any metric 
+        fails.</li>
+    </ol>
+<br>
+<h3>The steps in the weekly build of the project</h3>
+
+<ol>
+    <li>First of all, we created a Kubernetes cluster on AWS EKS service for manual QA 
+        tests using eksctl. </li>
+    <li>we have created AWS ECR Repo to store images using AWS CLI</li>
+    <li>Every week on Sunday, we packaged the app into jars with Maven Wrapper.</li>
+    <li>Then we prepared image tags for Docker Images</li>
+    <li>Next, we built App Docker Images</li>
+    <li>After that, we pushed the images to the ECR Repo using AWS CLI.</li>
+    <li>We prepare helm charts for the application and push AWS S3 Service.</li>
+    <li>Next, we deployed the App on the Kubernetes cluster using the Helm charts.</li>
+    </ol>
+<br>
+    <h4>Rancher</h4>
+
+I used Rancher to create and manage our Kubernetes clusters. To install the Rancher, I
+used the Helm chart. With Rancher, we easily made changes in the cluster via its
+dashboard, add nodes, delete nodes, edit configuration files, and used kubectl on its
+terminal. 
+ <h4>Monitoring tools</h4>
+We monitored the applications in the cluster with Prometheus and Grafana
+
+<footer>
+    <p>&#169; 2023 Mehmet Odabasi</p>
+  </footer>
+</body>
+</html>
