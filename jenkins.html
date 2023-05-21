@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jenkins</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="shortcut icon" href="images/fav-lotus.png" type="image/x-icon" />
+    <script
+      src="https://kit.fontawesome.com/12dbc08a40.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body id="certbody">
+    <header class="otherheader">
+      <h1><span id="title">Mehmet</span> <span id="title2">Odabasi</span></h1>
+      <nav class="socials">
+        <a href="https://www.linkedin.com/in/mehmet-odabasi/" target="_blank"
+          ><i class="fa-brands fa-linkedin"></i
+        ></a>
+        <a href="https://twitter.com/mehmetodabashi" target="_blank"
+          ><i class="fa-brands fa-twitter"></i
+        ></a>
+        <a href="https://medium.com/@mehmetodabashi" target="_blank"
+          ><i class="fa-brands fa-medium"></i
+        ></a>
+        <a href="https://github.com/OdabasiMehmet" target="_blank"
+          ><i class="fa-brands fa-github"></i
+        ></a>
+      </nav>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="articles.html">Articles</a>
+        <a href="certifications.html" style="color: #09c7e9">Certifications</a>
+        <a href="portfolio.html">Portfolio</a>
+      </nav>
+    </header>
+      <div class="showWhite"> 
+        
+        <h2 style="text-align: center;">Jenkins Pipeline for Web Page Application (Postgresql-Nodejs-React)</h2>
+<br>
+This project aimed to create a Jenkins pipeline to deploy a web-page application written with Nodejs and
+React Frameworks. AWS were used in terms of Cloud Infrastructure and created by using Ansible. 
+The infrastructure had 1 jenkins server (`Amazon Linux 2 AMI`) as ansible control node and 3 EC2's as worker node (`Red Hat Enterprise Linux 8 with High Availability`). These EC2's were launched on AWS console. Web-page had 3 main components which are postgresql, nodejs, and react.
+Each component was serving in Docker containers on EC2s that were dedicated for them. 
+Postgresql was serving as Database of the web-page. Nodejs controlled backend part of web-side and 
+react controlled frontend side of web-page. 
+<footer>
+    <p>&#169; 2023 Mehmet Odabasi</p>
+  </footer>
+</body>
+</html>
